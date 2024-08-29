@@ -60,7 +60,7 @@ func translateCandidate(choice goopenai.ChatCompletionChoice, jsonMode bool) *ai
 	}
 
 	if jsonMode {
-		m.Content = append(m.Content, ai.NewJSONPart(choice.Message.Content))
+		m.Content = append(m.Content, ai.NewDataPart(choice.Message.Content))
 	} else {
 		m.Content = append(m.Content, ai.NewTextPart(choice.Message.Content))
 	}

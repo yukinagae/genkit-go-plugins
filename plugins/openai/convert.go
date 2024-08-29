@@ -64,46 +64,33 @@ func convertRequest(model string, input *ai.GenerateRequest) (goopenai.ChatCompl
 func convertMessages(messages []*ai.Message) ([]goopenai.ChatCompletionMessage, error) {
 	var msgs []goopenai.ChatCompletionMessage
 	for _, m := range messages {
-		role := fromAIRoleToOpenAIRole(m.Role)
+		role, err := convertRole(m.Role)
+		if err != nil {
+			return nil, err
+		}
 		switch role {
 		case goopenai.ChatMessageRoleSystem: // system
-			msgs = append(msgs, goopenai.ChatCompletionMessage{
-				Role:    role,
-				Content: m.Content[0].Text,
-			})
+			sm := convertSystemMessage(m)
+			msgs = append(msgs, sm.toMessage())
 		case goopenai.ChatMessageRoleUser: // user
-			multiContent, err := convertMultiContent(m.Content)
+			um, err := convertUserMessage(m)
 			if err != nil {
 				return nil, err
 			}
-			msgs = append(msgs, goopenai.ChatCompletionMessage{
-				Role:         role,
-				MultiContent: multiContent,
-			})
+			msgs = append(msgs, um.toMessage())
 		case goopenai.ChatMessageRoleAssistant: // assistant
-			toolCalls := convertToolCalls(m.Content)
-			if len(toolCalls) > 0 {
-				msgs = append(msgs, goopenai.ChatCompletionMessage{
-					Role:      role,
-					ToolCalls: toolCalls,
-				})
-			} else {
-				msgs = append(msgs, goopenai.ChatCompletionMessage{
-					Role:    role,
-					Content: m.Content[0].Text,
-				})
-			}
+			am := convertAssistantMessage(m)
+			msgs = append(msgs, am.toMessage())
 		case goopenai.ChatMessageRoleTool: // tool
 			for _, p := range m.Content {
 				if !p.IsToolResponse() {
 					continue
 				}
-				msgs = append(msgs, goopenai.ChatCompletionMessage{
-					Role: role,
-					// NOTE: Temporarily set its name instead of its ref (i.e. call_xxxxx) since it's not defined in the ai.ToolResponse struct.
-					ToolCallID: p.ToolResponse.Name,
-					Content:    mapToJSONString(p.ToolResponse.Output),
-				})
+				tm, err := convertToolMessage(p)
+				if err != nil {
+					return nil, err
+				}
+				msgs = append(msgs, tm.toMessage())
 			}
 		default:
 			return nil, fmt.Errorf("Unknown OpenAI Role %s", role)
@@ -112,49 +99,46 @@ func convertMessages(messages []*ai.Message) ([]goopenai.ChatCompletionMessage, 
 	return msgs, nil
 }
 
-func convertMultiContent(content []*ai.Part) ([]goopenai.ChatMessagePart, error) {
-	var multiContent []goopenai.ChatMessagePart
-	for _, p := range content {
-		part, err := convertPart(p)
-		if err != nil {
-			return nil, err
-		}
-		multiContent = append(multiContent, part)
-	}
-	return multiContent, nil
-}
-
 func convertToolCalls(content []*ai.Part) []goopenai.ToolCall {
 	var toolCalls []goopenai.ToolCall
 	for _, p := range content {
 		if !p.IsToolRequest() {
 			continue
 		}
-		toolCalls = append(toolCalls, goopenai.ToolCall{
-			// NOTE: Temporarily set its name instead of its ref (i.e. call_xxxxx) since it's not defined in the ai.ToolRequest struct.
-			ID:   p.ToolRequest.Name,
-			Type: goopenai.ToolTypeFunction,
-			Function: goopenai.FunctionCall{
-				Name:      p.ToolRequest.Name,
-				Arguments: mapToJSONString(p.ToolRequest.Input),
-			},
-		})
+		toolCall := convertToolCall(p)
+		toolCalls = append(toolCalls, toolCall)
 	}
 	return toolCalls
 }
 
-func fromAIRoleToOpenAIRole(aiRole ai.Role) string {
+func convertToolCall(part *ai.Part) goopenai.ToolCall {
+	arguments := ""
+	if len(part.ToolRequest.Input) > 0 {
+		arguments = mapToJSONString(part.ToolRequest.Input)
+	}
+	return goopenai.ToolCall{
+		// NOTE: Temporarily set its name instead of its ref (i.e. call_xxxxx) since it's not defined in the ai.ToolRequest struct.
+		ID:   part.ToolRequest.Name,
+		Type: goopenai.ToolTypeFunction,
+		Function: goopenai.FunctionCall{
+			Name:      part.ToolRequest.Name,
+			Arguments: arguments,
+		},
+	}
+}
+
+func convertRole(aiRole ai.Role) (string, error) {
 	switch aiRole {
-	case ai.RoleUser:
-		return goopenai.ChatMessageRoleUser
-	case ai.RoleSystem:
-		return goopenai.ChatMessageRoleSystem
-	case ai.RoleModel:
-		return goopenai.ChatMessageRoleAssistant
-	case ai.RoleTool:
-		return goopenai.ChatMessageRoleTool
+	case ai.RoleUser: // user -> user
+		return goopenai.ChatMessageRoleUser, nil
+	case ai.RoleSystem: // system -> system
+		return goopenai.ChatMessageRoleSystem, nil
+	case ai.RoleModel: // model -> assistant
+		return goopenai.ChatMessageRoleAssistant, nil
+	case ai.RoleTool: // tool -> tool
+		return goopenai.ChatMessageRoleTool, nil
 	default:
-		panic(fmt.Sprintf("Unknown ai.Role: %s", aiRole))
+		return "", fmt.Errorf("Unknown ai.Role: %s", aiRole)
 	}
 }
 
@@ -179,21 +163,28 @@ func convertPart(part *ai.Part) (goopenai.ChatMessagePart, error) {
 }
 
 func convertTools(inTools []*ai.ToolDefinition) ([]goopenai.Tool, error) {
-	var outTools []goopenai.Tool
+	var tools []goopenai.Tool
 	for _, t := range inTools {
-		parameters, err := mapToJSONRawMessage(t.InputSchema)
+		tool, err := convertTool(t)
 		if err != nil {
 			return nil, err
 		}
-		outTool := goopenai.Tool{
-			Type: goopenai.ToolTypeFunction,
-			Function: &goopenai.FunctionDefinition{
-				Name:        t.Name,
-				Description: t.Description,
-				Parameters:  parameters,
-			},
-		}
-		outTools = append(outTools, outTool)
+		tools = append(tools, tool)
 	}
-	return outTools, nil
+	return tools, nil
+}
+
+func convertTool(t *ai.ToolDefinition) (goopenai.Tool, error) {
+	parameters, err := mapToJSONRawMessage(t.InputSchema)
+	if err != nil {
+		return goopenai.Tool{}, err
+	}
+	return goopenai.Tool{
+		Type: goopenai.ToolTypeFunction,
+		Function: &goopenai.FunctionDefinition{
+			Name:        t.Name,
+			Description: t.Description,
+			Parameters:  parameters,
+		},
+	}, nil
 }
