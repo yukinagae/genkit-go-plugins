@@ -4,6 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/yukinagae/genkit-go-plugins)](https://goreportcard.com/report/github.com/yukinagae/genkit-go-plugins)
 [![GitHub License](https://img.shields.io/github/license/yukinagae/genkit-go-plugins)](https://github.com/yukinagae/genkit-go-plugins/blob/main/LICENSE)
 
+This repository contains Go community plugins for [Firebase Genkit](https://github.com/firebase/genkit).
+
 ## Available plugins
 
 ### Model / Embedding Plugins
