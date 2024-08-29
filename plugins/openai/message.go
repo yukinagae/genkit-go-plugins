@@ -7,30 +7,30 @@ import (
 	goopenai "github.com/sashabaranov/go-openai"
 )
 
-type SystemMessage struct {
+type systemMessage struct {
 	Content string `json:"content"`
 	Name    string `json:"name,omitempty"`
 }
 
-func convertSystemMessage(msg *ai.Message) *SystemMessage {
-	return &SystemMessage{
+func convertSystemMessage(msg *ai.Message) *systemMessage {
+	return &systemMessage{
 		Content: msg.Content[0].Text,
 	}
 }
 
-func (m *SystemMessage) toMessage() goopenai.ChatCompletionMessage {
+func (m *systemMessage) toMessage() goopenai.ChatCompletionMessage {
 	return goopenai.ChatCompletionMessage{
 		Role:    goopenai.ChatMessageRoleSystem,
 		Content: m.Content,
 	}
 }
 
-type UserMessage struct {
+type userMessage struct {
 	Content []goopenai.ChatMessagePart `json:"content"`
 	Name    string                     `json:"name,omitempty"`
 }
 
-func convertUserMessage(msg *ai.Message) (*UserMessage, error) {
+func convertUserMessage(msg *ai.Message) (*userMessage, error) {
 	var multiContent []goopenai.ChatMessagePart
 	for _, p := range msg.Content {
 		part, err := convertPart(p)
@@ -39,34 +39,34 @@ func convertUserMessage(msg *ai.Message) (*UserMessage, error) {
 		}
 		multiContent = append(multiContent, part)
 	}
-	return &UserMessage{
+	return &userMessage{
 		Content: multiContent,
 	}, nil
 }
 
-func (m *UserMessage) toMessage() goopenai.ChatCompletionMessage {
+func (m *userMessage) toMessage() goopenai.ChatCompletionMessage {
 	return goopenai.ChatCompletionMessage{
 		Role:         goopenai.ChatMessageRoleUser,
 		MultiContent: m.Content,
 	}
 }
 
-type AssistantMessage struct {
+type assistantMessage struct {
 	ToolCalls []goopenai.ToolCall `json:"tool_calls"`
 	Content   string              `json:"content"`
 	Refusal   string              `json:"refusal,omitempty"`
 	Name      string              `json:"name,omitempty"`
 }
 
-func convertAssistantMessage(msg *ai.Message) *AssistantMessage {
+func convertAssistantMessage(msg *ai.Message) *assistantMessage {
 	toolCalls := convertToolCalls(msg.Content)
-	return &AssistantMessage{
+	return &assistantMessage{
 		ToolCalls: toolCalls,
 		Content:   msg.Content[0].Text,
 	}
 }
 
-func (m *AssistantMessage) toMessage() goopenai.ChatCompletionMessage {
+func (m *assistantMessage) toMessage() goopenai.ChatCompletionMessage {
 	return goopenai.ChatCompletionMessage{
 		Role:      goopenai.ChatMessageRoleAssistant,
 		ToolCalls: m.ToolCalls,
@@ -74,23 +74,23 @@ func (m *AssistantMessage) toMessage() goopenai.ChatCompletionMessage {
 	}
 }
 
-type ToolMessage struct {
+type toolMessage struct {
 	Content    string `json:"content"`
 	ToolCallID string `json:"tool_call_id"`
 }
 
-func convertToolMessage(part *ai.Part) (*ToolMessage, error) {
+func convertToolMessage(part *ai.Part) (*toolMessage, error) {
 	if !part.IsToolResponse() {
 		return nil, fmt.Errorf("part is not a tool response: %#v", part)
 	}
-	return &ToolMessage{
+	return &toolMessage{
 		Content: mapToJSONString(part.ToolResponse.Output),
 		// NOTE: Temporarily set its name instead of its ref (i.e. call_xxxxx) since it's not defined in the ai.ToolResponse struct.
 		ToolCallID: part.ToolResponse.Name,
 	}, nil
 }
 
-func (m *ToolMessage) toMessage() goopenai.ChatCompletionMessage {
+func (m *toolMessage) toMessage() goopenai.ChatCompletionMessage {
 	return goopenai.ChatCompletionMessage{
 		Role:       goopenai.ChatMessageRoleTool,
 		ToolCallID: m.ToolCallID,
