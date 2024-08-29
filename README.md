@@ -1,9 +1,9 @@
-# Firebase Genkit Go Community Plugins
-
 <div style="display: flex; align-items: flex-start;">
   <img src="./docs/resources/genkit-logo.svg" title="Firebase Genkit" alt="Firebase Genkit Logo" style="width: 150px;">
-  <img src="./docs/resources/go-logo.svg" title="Go" alt="Go Logo" style="width: 200px;">
+  <img src="./docs/resources/go-logo.svg" title="Go" alt="Go Logo" style="width: 150px;">
 </div>
+
+# Firebase Genkit Go Community Plugins
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/yukinagae/genkit-go-plugins.svg)](https://pkg.go.dev/github.com/yukinagae/genkit-go-plugins)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yukinagae/genkit-go-plugins)](https://goreportcard.com/report/github.com/yukinagae/genkit-go-plugins)
