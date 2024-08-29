@@ -78,4 +78,4 @@ func main() {
 }
 ```
 
-For detailed information about Firebase Genkit, please refer to the official documentation: [Get started with Genkit using Go (alpha) ](https://firebase.google.com/docs/genkit-go/get-started-go)
+See the official [Genkit Go Documentation](https://firebase.google.com/docs/genkit-go/get-started-go) for more details.
