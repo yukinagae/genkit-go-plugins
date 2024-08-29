@@ -112,10 +112,10 @@ func TestConvertMessages(t *testing.T) {
 				},
 			},
 			want: []goopenai.ChatCompletionMessage{
-				goopenai.ChatCompletionMessage{
+				{
 					Role: goopenai.ChatMessageRoleAssistant,
 					ToolCalls: []goopenai.ToolCall{
-						goopenai.ToolCall{
+						{
 							ID:   "tellAFunnyJoke",
 							Type: goopenai.ToolTypeFunction,
 							Function: goopenai.FunctionCall{
@@ -143,7 +143,7 @@ func TestConvertMessages(t *testing.T) {
 				},
 			},
 			want: []goopenai.ChatCompletionMessage{
-				goopenai.ChatCompletionMessage{
+				{
 					Role:       goopenai.ChatMessageRoleTool,
 					ToolCallID: "tellAFunnyJoke",
 					Content:    "{\"joke\":\"Why did the bob cross the road?\"}",
@@ -167,23 +167,23 @@ func TestConvertMessages(t *testing.T) {
 				},
 			},
 			want: []goopenai.ChatCompletionMessage{
-				goopenai.ChatCompletionMessage{
+				{
 					Role: goopenai.ChatMessageRoleUser,
 					MultiContent: []goopenai.ChatMessagePart{
-						goopenai.ChatMessagePart{
+						{
 							Type: goopenai.ChatMessagePartTypeText,
 							Text: "hi",
 						},
 					},
 				},
-				goopenai.ChatCompletionMessage{
+				{
 					Role:    goopenai.ChatMessageRoleAssistant,
 					Content: "how can I help you?",
 				},
-				goopenai.ChatCompletionMessage{
+				{
 					Role: goopenai.ChatMessageRoleUser,
 					MultiContent: []goopenai.ChatMessagePart{
-						goopenai.ChatMessagePart{
+						{
 							Type: goopenai.ChatMessagePartTypeText,
 							Text: "I am testing",
 						},
@@ -203,14 +203,14 @@ func TestConvertMessages(t *testing.T) {
 				},
 			},
 			want: []goopenai.ChatCompletionMessage{
-				goopenai.ChatCompletionMessage{
+				{
 					Role: goopenai.ChatMessageRoleUser,
 					MultiContent: []goopenai.ChatMessagePart{
-						goopenai.ChatMessagePart{
+						{
 							Type: goopenai.ChatMessagePartTypeText,
 							Text: "describe the following image:",
 						},
-						goopenai.ChatMessagePart{
+						{
 							Type: goopenai.ChatMessagePartTypeImageURL,
 							ImageURL: &goopenai.ChatMessageImageURL{
 								URL:    "https://example.com/image.jpg",
@@ -230,7 +230,7 @@ func TestConvertMessages(t *testing.T) {
 				},
 			},
 			want: []goopenai.ChatCompletionMessage{
-				goopenai.ChatCompletionMessage{
+				{
 					Role:    goopenai.ChatMessageRoleSystem,
 					Content: "system message",
 				},
@@ -393,7 +393,7 @@ func TestConvertRequest(t *testing.T) {
 				model: goopenai.GPT4o,
 				req: &ai.GenerateRequest{
 					Messages: []*ai.Message{
-						&ai.Message{
+						{
 							Role:    ai.RoleUser,
 							Content: []*ai.Part{ai.NewTextPart("Tell a joke about dogs.")},
 						},
@@ -413,10 +413,10 @@ func TestConvertRequest(t *testing.T) {
 			want: goopenai.ChatCompletionRequest{
 				Model: goopenai.GPT4o,
 				Messages: []goopenai.ChatCompletionMessage{
-					goopenai.ChatCompletionMessage{
+					{
 						Role: goopenai.ChatMessageRoleUser,
 						MultiContent: []goopenai.ChatMessagePart{
-							goopenai.ChatMessagePart{
+							{
 								Type: goopenai.ChatMessagePartTypeText,
 								Text: "Tell a joke about dogs.",
 							},
@@ -442,11 +442,11 @@ func TestConvertRequest(t *testing.T) {
 				model: goopenai.GPT4o,
 				req: &ai.GenerateRequest{
 					Messages: []*ai.Message{
-						&ai.Message{
+						{
 							Role:    ai.RoleUser,
 							Content: []*ai.Part{ai.NewTextPart("Tell a joke about dogs.")},
 						},
-						&ai.Message{
+						{
 							Role: ai.RoleModel,
 							Content: []*ai.Part{ai.NewToolRequestPart(
 								&ai.ToolRequest{
@@ -457,7 +457,7 @@ func TestConvertRequest(t *testing.T) {
 								},
 							)},
 						},
-						&ai.Message{
+						{
 							Role: ai.RoleTool,
 							Content: []*ai.Part{ai.NewToolResponsePart(
 								&ai.ToolResponse{
@@ -470,7 +470,7 @@ func TestConvertRequest(t *testing.T) {
 						},
 					},
 					Tools: []*ai.ToolDefinition{
-						&ai.ToolDefinition{
+						{
 							Name:        "tellAFunnyJoke",
 							Description: "Tells jokes about an input topic. Use this tool whenever user asks you to tell a joke.",
 							InputSchema: map[string]any{
@@ -498,19 +498,19 @@ func TestConvertRequest(t *testing.T) {
 			want: goopenai.ChatCompletionRequest{
 				Model: goopenai.GPT4o,
 				Messages: []goopenai.ChatCompletionMessage{
-					goopenai.ChatCompletionMessage{
+					{
 						Role: goopenai.ChatMessageRoleUser,
 						MultiContent: []goopenai.ChatMessagePart{
-							goopenai.ChatMessagePart{
+							{
 								Type: goopenai.ChatMessagePartTypeText,
 								Text: "Tell a joke about dogs.",
 							},
 						},
 					},
-					goopenai.ChatCompletionMessage{
+					{
 						Role: goopenai.ChatMessageRoleAssistant,
 						ToolCalls: []goopenai.ToolCall{
-							goopenai.ToolCall{
+							{
 								ID:   "tellAFunnyJoke",
 								Type: goopenai.ToolTypeFunction,
 								Function: goopenai.FunctionCall{
@@ -520,14 +520,14 @@ func TestConvertRequest(t *testing.T) {
 							},
 						},
 					},
-					goopenai.ChatCompletionMessage{
+					{
 						Role:       goopenai.ChatMessageRoleTool,
 						ToolCallID: "tellAFunnyJoke",
 						Content:    "{\"joke\":\"Why did the dogs cross the road?\"}",
 					},
 				},
 				Tools: []goopenai.Tool{
-					goopenai.Tool{
+					{
 						Type: goopenai.ToolTypeFunction,
 						Function: &goopenai.FunctionDefinition{
 							Name:        "tellAFunnyJoke",
@@ -550,11 +550,11 @@ func TestConvertRequest(t *testing.T) {
 				model: goopenai.GPT4o,
 				req: &ai.GenerateRequest{
 					Messages: []*ai.Message{
-						&ai.Message{
+						{
 							Role:    ai.RoleUser,
 							Content: []*ai.Part{ai.NewTextPart("Tell a joke about dogs.")},
 						},
-						&ai.Message{
+						{
 							Role: ai.RoleModel,
 							Content: []*ai.Part{ai.NewToolRequestPart(
 								&ai.ToolRequest{
@@ -565,7 +565,7 @@ func TestConvertRequest(t *testing.T) {
 								},
 							)},
 						},
-						&ai.Message{
+						{
 							Role: ai.RoleTool,
 							Content: []*ai.Part{ai.NewToolResponsePart(
 								&ai.ToolResponse{
@@ -578,7 +578,7 @@ func TestConvertRequest(t *testing.T) {
 						},
 					},
 					Tools: []*ai.ToolDefinition{
-						&ai.ToolDefinition{
+						{
 							Name:        "tellAFunnyJoke",
 							Description: "Tells jokes about an input topic. Use this tool whenever user asks you to tell a joke.",
 							InputSchema: map[string]any{
@@ -606,19 +606,19 @@ func TestConvertRequest(t *testing.T) {
 			want: goopenai.ChatCompletionRequest{
 				Model: goopenai.GPT4o,
 				Messages: []goopenai.ChatCompletionMessage{
-					goopenai.ChatCompletionMessage{
+					{
 						Role: goopenai.ChatMessageRoleUser,
 						MultiContent: []goopenai.ChatMessagePart{
-							goopenai.ChatMessagePart{
+							{
 								Type: goopenai.ChatMessagePartTypeText,
 								Text: "Tell a joke about dogs.",
 							},
 						},
 					},
-					goopenai.ChatCompletionMessage{
+					{
 						Role: goopenai.ChatMessageRoleAssistant,
 						ToolCalls: []goopenai.ToolCall{
-							goopenai.ToolCall{
+							{
 								ID:   "tellAFunnyJoke",
 								Type: goopenai.ToolTypeFunction,
 								Function: goopenai.FunctionCall{
@@ -628,14 +628,14 @@ func TestConvertRequest(t *testing.T) {
 							},
 						},
 					},
-					goopenai.ChatCompletionMessage{
+					{
 						Role:       goopenai.ChatMessageRoleTool,
 						ToolCallID: "tellAFunnyJoke",
 						Content:    "{\"joke\":\"Why did the dogs cross the road?\"}",
 					},
 				},
 				Tools: []goopenai.Tool{
-					goopenai.Tool{
+					{
 						Type: goopenai.ToolTypeFunction,
 						Function: &goopenai.FunctionDefinition{
 							Name:        "tellAFunnyJoke",

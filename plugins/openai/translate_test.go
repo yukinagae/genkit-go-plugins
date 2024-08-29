@@ -81,7 +81,7 @@ func TestTranslateCandidate(t *testing.T) {
 						Role:    goopenai.ChatMessageRoleAssistant,
 						Content: "Tool call",
 						ToolCalls: []goopenai.ToolCall{
-							goopenai.ToolCall{
+							{
 								ID:   "exampleTool",
 								Type: goopenai.ToolTypeFunction,
 								Function: goopenai.FunctionCall{
