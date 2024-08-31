@@ -24,16 +24,18 @@ var state struct {
 
 var (
 	knownCaps = map[string]ai.ModelCapabilities{
-		goopenai.GPT4o:     Multimodal,
-		goopenai.GPT4oMini: Multimodal,
-		goopenai.GPT4Turbo: Multimodal,
-		goopenai.GPT4:      BasicText,
+		goopenai.GPT4o:         Multimodal,
+		goopenai.GPT4oMini:     Multimodal,
+		goopenai.GPT4Turbo:     Multimodal,
+		goopenai.GPT4:          BasicText,
+		goopenai.GPT3Dot5Turbo: BasicText,
 	}
 
 	modelsSupportingResponseFormats = []string{
-		goopenai.GPT4o,     //
-		goopenai.GPT4oMini, //
-		goopenai.GPT4Turbo, //
+		goopenai.GPT4o,
+		goopenai.GPT4oMini,
+		goopenai.GPT4Turbo,
+		goopenai.GPT3Dot5Turbo,
 	}
 
 	knownEmbedders = []string{
