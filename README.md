@@ -79,3 +79,7 @@ func main() {
 ```
 
 See the official [Genkit Go Documentation](https://firebase.google.com/docs/genkit-go/get-started-go) for more details.
+
+## Contributing
+
+We welcome contributions to this project! To get started, please refer to our [Contribution Guide](https://github.com/yukinagae/genkit-go-plugins/blob/main/CONTRIBUTING.md).
