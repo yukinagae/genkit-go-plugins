@@ -116,7 +116,7 @@ func TestTranslateCandidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := translateCandidate(tt.input.choice, tt.input.jsonMode)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("convertRole() = %#v, want %#v", got, tt.want)
+				t.Errorf("translateCandidate() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}

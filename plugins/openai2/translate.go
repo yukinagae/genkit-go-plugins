@@ -25,6 +25,7 @@ func translateCandidate(choice goopenai.ChatCompletionChoice, jsonMode bool) *ai
 	c := &ai.Candidate{
 		Index: int(choice.Index),
 	}
+
 	switch choice.FinishReason {
 	case goopenai.ChatCompletionChoicesFinishReasonStop, goopenai.ChatCompletionChoicesFinishReasonToolCalls:
 		c.FinishReason = ai.FinishReasonStop
@@ -37,6 +38,7 @@ func translateCandidate(choice goopenai.ChatCompletionChoice, jsonMode bool) *ai
 	default:
 		c.FinishReason = ai.FinishReasonUnknown
 	}
+
 	m := &ai.Message{
 		Role: ai.RoleModel,
 	}

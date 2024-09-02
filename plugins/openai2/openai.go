@@ -205,12 +205,12 @@ func generate(
 	input *ai.GenerateRequest,
 	cb func(context.Context, *ai.GenerateResponseChunk) error, // TODO: implement streaming
 ) (*ai.GenerateResponse, error) {
-	params, err := convertRequest(model, input)
+	req, err := convertRequest(model, input)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := client.Chat.Completions.New(ctx, params)
+	res, err := client.Chat.Completions.New(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func generate(
 		jsonMode = true
 	}
 
-	r := translateResponse(resp, jsonMode)
+	r := translateResponse(res, jsonMode)
 	r.Request = input
 	return r, nil
 }
