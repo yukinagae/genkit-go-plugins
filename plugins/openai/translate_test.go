@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/firebase/genkit/go/ai"
-	goopenai "github.com/sashabaranov/go-openai"
+	goopenai "github.com/openai/openai-go"
 )
 
 func TestTranslateCandidate(t *testing.T) {
@@ -26,10 +26,10 @@ func TestTranslateCandidate(t *testing.T) {
 				choice: goopenai.ChatCompletionChoice{
 					Index: 0,
 					Message: goopenai.ChatCompletionMessage{
-						Role:    goopenai.ChatMessageRoleAssistant,
+						Role:    goopenai.ChatCompletionMessageRoleAssistant,
 						Content: "Tell a joke about dogs.",
 					},
-					FinishReason: goopenai.FinishReasonLength,
+					FinishReason: goopenai.ChatCompletionChoicesFinishReasonLength,
 				},
 				jsonMode: false,
 			},
@@ -52,10 +52,10 @@ func TestTranslateCandidate(t *testing.T) {
 				choice: goopenai.ChatCompletionChoice{
 					Index: 0,
 					Message: goopenai.ChatCompletionMessage{
-						Role:    goopenai.ChatMessageRoleAssistant,
+						Role:    goopenai.ChatCompletionMessageRoleAssistant,
 						Content: "{\"json\": \"test\"}",
 					},
-					FinishReason: goopenai.FinishReasonContentFilter,
+					FinishReason: goopenai.ChatCompletionChoicesFinishReasonContentFilter,
 				},
 				jsonMode: true,
 			},
@@ -78,20 +78,20 @@ func TestTranslateCandidate(t *testing.T) {
 				choice: goopenai.ChatCompletionChoice{
 					Index: 0,
 					Message: goopenai.ChatCompletionMessage{
-						Role:    goopenai.ChatMessageRoleAssistant,
+						Role:    goopenai.ChatCompletionMessageRoleAssistant,
 						Content: "Tool call",
-						ToolCalls: []goopenai.ToolCall{
+						ToolCalls: []goopenai.ChatCompletionMessageToolCall{
 							{
 								ID:   "exampleTool",
-								Type: goopenai.ToolTypeFunction,
-								Function: goopenai.FunctionCall{
+								Type: goopenai.ChatCompletionMessageToolCallTypeFunction,
+								Function: goopenai.ChatCompletionMessageToolCallFunction{
 									Name:      "exampleTool",
 									Arguments: "{\"param\": \"value\"}",
 								},
 							},
 						},
 					},
-					FinishReason: goopenai.FinishReasonToolCalls,
+					FinishReason: goopenai.ChatCompletionChoicesFinishReasonToolCalls,
 				},
 				jsonMode: false,
 			},
@@ -116,7 +116,7 @@ func TestTranslateCandidate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := translateCandidate(tt.input.choice, tt.input.jsonMode)
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("convertRole() = %#v, want %#v", got, tt.want)
+				t.Errorf("translateCandidate() = %#v, want %#v", got, tt.want)
 			}
 		})
 	}

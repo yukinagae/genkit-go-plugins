@@ -2,11 +2,10 @@ package openai
 
 import (
 	"github.com/firebase/genkit/go/ai"
-	goopenai "github.com/sashabaranov/go-openai"
+	goopenai "github.com/openai/openai-go"
 )
 
-// Translate from a goopenai.ChatCompletionResponse to a ai.GenerateResponse.
-func translateResponse(resp goopenai.ChatCompletionResponse, jsonMode bool) *ai.GenerateResponse {
+func translateResponse(resp *goopenai.ChatCompletion, jsonMode bool) *ai.GenerateResponse {
 	r := &ai.GenerateResponse{}
 
 	for _, c := range resp.Choices {
@@ -14,33 +13,32 @@ func translateResponse(resp goopenai.ChatCompletionResponse, jsonMode bool) *ai.
 	}
 
 	r.Usage = &ai.GenerationUsage{
-		InputTokens:  resp.Usage.PromptTokens,
-		OutputTokens: resp.Usage.CompletionTokens,
-		TotalTokens:  resp.Usage.TotalTokens,
+		InputTokens:  int(resp.Usage.PromptTokens),
+		OutputTokens: int(resp.Usage.CompletionTokens),
+		TotalTokens:  int(resp.Usage.TotalTokens),
 	}
 	r.Custom = resp
 	return r
 }
 
-// translateCandidate translates from a goopenai.ChatCompletionChoice to an ai.Candidate.
 func translateCandidate(choice goopenai.ChatCompletionChoice, jsonMode bool) *ai.Candidate {
 	c := &ai.Candidate{
-		Index: choice.Index,
+		Index: int(choice.Index),
 	}
+
 	switch choice.FinishReason {
-	case goopenai.FinishReasonStop, goopenai.FinishReasonToolCalls:
+	case goopenai.ChatCompletionChoicesFinishReasonStop, goopenai.ChatCompletionChoicesFinishReasonToolCalls:
 		c.FinishReason = ai.FinishReasonStop
-	case goopenai.FinishReasonLength:
+	case goopenai.ChatCompletionChoicesFinishReasonLength:
 		c.FinishReason = ai.FinishReasonLength
-	case goopenai.FinishReasonContentFilter:
+	case goopenai.ChatCompletionChoicesFinishReasonContentFilter:
 		c.FinishReason = ai.FinishReasonBlocked
-	case goopenai.FinishReasonFunctionCall:
+	case goopenai.ChatCompletionChoicesFinishReasonFunctionCall:
 		c.FinishReason = ai.FinishReasonOther
-	case goopenai.FinishReasonNull:
-		c.FinishReason = ai.FinishReasonUnknown
 	default:
 		c.FinishReason = ai.FinishReasonUnknown
 	}
+
 	m := &ai.Message{
 		Role: ai.RoleModel,
 	}

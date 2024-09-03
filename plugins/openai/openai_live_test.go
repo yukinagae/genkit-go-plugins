@@ -1,4 +1,4 @@
-package openai_test
+package openai
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/firebase/genkit/go/ai"
-	"github.com/yukinagae/genkit-golang-openai-sample/plugins/openai"
 )
 
 // The tests here only work with an API key set to a valid value.
@@ -28,12 +27,12 @@ func TestLive(t *testing.T) {
 		t.Skip("-all provided")
 	}
 	ctx := context.Background()
-	if err := openai.Init(ctx, &openai.Config{APIKey: *apiKey}); err != nil {
+	if err := Init(ctx, &Config{APIKey: *apiKey}); err != nil {
 		t.Fatal(err)
 	}
 
-	embedder := openai.Embedder("text-embedding-3-small")
-	model := openai.Model("gpt-4o-mini")
+	embedder := Embedder("text-embedding-3-small")
+	model := Model("gpt-4o-mini")
 
 	t.Run("embedder", func(t *testing.T) {
 		res, err := ai.Embed(ctx, embedder, ai.WithEmbedText("yellow banana"))

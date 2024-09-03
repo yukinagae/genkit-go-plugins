@@ -7,7 +7,9 @@ import (
 	"sync"
 
 	"github.com/firebase/genkit/go/ai"
-	goopenai "github.com/sashabaranov/go-openai"
+
+	goopenai "github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 )
 
 const (
@@ -24,24 +26,24 @@ var state struct {
 
 var (
 	knownCaps = map[string]ai.ModelCapabilities{
-		goopenai.GPT4o:         Multimodal,
-		goopenai.GPT4oMini:     Multimodal,
-		goopenai.GPT4Turbo:     Multimodal,
-		goopenai.GPT4:          BasicText,
-		goopenai.GPT3Dot5Turbo: BasicText,
+		goopenai.ChatModelGPT4o:       Multimodal,
+		goopenai.ChatModelGPT4oMini:   Multimodal,
+		goopenai.ChatModelGPT4Turbo:   Multimodal,
+		goopenai.ChatModelGPT4:        BasicText,
+		goopenai.ChatModelGPT3_5Turbo: BasicText,
 	}
 
 	modelsSupportingResponseFormats = []string{
-		goopenai.GPT4o,
-		goopenai.GPT4oMini,
-		goopenai.GPT4Turbo,
-		goopenai.GPT3Dot5Turbo,
+		goopenai.ChatModelGPT4o,
+		goopenai.ChatModelGPT4oMini,
+		goopenai.ChatModelGPT4Turbo,
+		goopenai.ChatModelGPT3_5Turbo,
 	}
 
 	knownEmbedders = []string{
-		string(goopenai.SmallEmbedding3),
-		string(goopenai.LargeEmbedding3),
-		string(goopenai.AdaEmbeddingV2),
+		string(goopenai.EmbeddingNewParamsModelTextEmbedding3Small),
+		string(goopenai.EmbeddingNewParamsModelTextEmbedding3Large),
+		string(goopenai.EmbeddingNewParamsModelTextEmbeddingAda002),
 	}
 )
 
@@ -77,7 +79,9 @@ func Init(ctx context.Context, cfg *Config) (err error) {
 		}
 	}
 
-	client := goopenai.NewClient(apiKey)
+	client := goopenai.NewClient(
+		option.WithAPIKey(apiKey),
+	)
 	state.client = client
 	state.initted = true
 	for model, caps := range knownCaps {
@@ -150,26 +154,33 @@ func IsDefinedEmbedder(name string) bool {
 // requires state.mu
 func defineEmbedder(name string) ai.Embedder {
 	return ai.DefineEmbedder(provider, name, func(ctx context.Context, input *ai.EmbedRequest) (*ai.EmbedResponse, error) {
-		var data []string
+		var data goopenai.EmbeddingNewParamsInputArrayOfStrings
 		for _, doc := range input.Documents {
 			for _, p := range doc.Content {
 				data = append(data, p.Text)
 			}
 		}
 
-		req := goopenai.EmbeddingRequest{
-			Input: data,
-			Model: goopenai.EmbeddingModel(name),
+		model := goopenai.EmbeddingNewParamsModel(name)
+
+		params := goopenai.EmbeddingNewParams{
+			Input:          goopenai.F[goopenai.EmbeddingNewParamsInputUnion](data),
+			Model:          goopenai.F(model),
+			EncodingFormat: goopenai.F(goopenai.EmbeddingNewParamsEncodingFormatFloat),
 		}
 
-		embRes, err := state.client.CreateEmbeddings(ctx, req)
+		embRes, err := state.client.Embeddings.New(ctx, params)
 		if err != nil {
 			return nil, err
 		}
 
 		var res ai.EmbedResponse
 		for _, emb := range embRes.Data {
-			res.Embeddings = append(res.Embeddings, &ai.DocumentEmbedding{Embedding: emb.Embedding})
+			embedding := make([]float32, len(emb.Embedding))
+			for i, val := range emb.Embedding {
+				embedding[i] = float32(val)
+			}
+			res.Embeddings = append(res.Embeddings, &ai.DocumentEmbedding{Embedding: embedding})
 		}
 		return &res, nil
 	})
@@ -199,7 +210,7 @@ func generate(
 		return nil, err
 	}
 
-	resp, err := client.CreateChatCompletion(ctx, req)
+	res, err := client.Chat.Completions.New(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -210,7 +221,7 @@ func generate(
 		jsonMode = true
 	}
 
-	r := translateResponse(resp, jsonMode)
+	r := translateResponse(res, jsonMode)
 	r.Request = input
 	return r, nil
 }

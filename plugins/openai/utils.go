@@ -20,11 +20,3 @@ func mapToJSONString(data map[string]any) string {
 	}
 	return string(jsonBytes)
 }
-
-func mapToJSONRawMessage(data map[string]any) (json.RawMessage, error) {
-	jsonBytes, err := json.Marshal(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal map to JSON string: data, %#v %w", data, err)
-	}
-	return json.RawMessage(jsonBytes), nil
-}
