@@ -3,6 +3,9 @@
   <img src="./docs/resources/go-logo.svg" title="Go" alt="Go Logo" style="width: 150px;">
 </div>
 
+> [!WARNING]
+> **This version is in preview and may have API changes and critical bugs. Use it for prototypes or hobby projects, not in production**.
+
 # Firebase Genkit Go Community Plugins
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/yukinagae/genkit-go-plugins.svg)](https://pkg.go.dev/github.com/yukinagae/genkit-go-plugins)
