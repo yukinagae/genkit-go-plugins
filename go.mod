@@ -5,8 +5,6 @@ go 1.23.0
 require (
 	github.com/firebase/genkit/go v0.1.1
 	github.com/openai/openai-go v0.1.0-alpha.13
-	github.com/sashabaranov/go-openai v1.29.0
-	github.com/yukinagae/genkit-golang-openai-sample v0.0.0-20240827144700-a4f4ad80881a
 )
 
 require (
