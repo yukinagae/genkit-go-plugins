@@ -15,7 +15,7 @@ This repository contains Go community plugins for [Firebase Genkit](https://gith
 
 ### Model / Embedding Plugins
 
-- [openai](https://github.com/yukinagae/genkit-go-plugins/openai) - Plugins for OpenAI APIs
+- openai - Plugins for OpenAI APIs
 
 ## Installation
 
