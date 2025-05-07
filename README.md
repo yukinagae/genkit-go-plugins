@@ -3,8 +3,15 @@
   <img src="./docs/resources/go-logo.svg" title="Go" alt="Go Logo" style="width: 150px;">
 </div>
 
-> [!WARNING]
-> **This version is in preview and may have API changes and critical bugs. Use it for prototypes or hobby projects, not in production**.
+> [!IMPORTANT]
+> **Great news!**  
+> **Compatible OpenAI plugins are now available in the official Firebase Genkit repository**:
+> 👉 https://github.com/firebase/genkit/tree/main/go/plugins/compat_oai  
+>
+> This repository is **archived and no longer maintained**.  
+> Please use and contribute to the above repository instead.  
+>
+> Thank you!
 
 # Firebase Genkit Go Community Plugins
 
